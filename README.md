@@ -1,8 +1,9 @@
-# 💰 Finance Tracker
+# 💰 FinTrack
 
-> A Python-based personal finance management application with investment portfolio tracking.
+> A Python-based personal finance management application with a modern web dashboard and real-time investment portfolio tracking.
 
 ![Python](https://img.shields.io/badge/Python-3.12+-blue?logo=python)
+![Flask](https://img.shields.io/badge/Flask-3.0+-lightgrey?logo=flask)
 ![SQLite](https://img.shields.io/badge/Database-SQLite-lightgrey?logo=sqlite)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
@@ -22,7 +23,7 @@
 
 ## 🔍 Overview
 
-Finance Tracker is a terminal-based personal finance application that helps you manage your income, expenses, budgets, and investments in one place. It supports real-time stock and cryptocurrency price tracking via Yahoo Finance API.
+FinTrack is a personal finance application that helps you manage income, expenses, budgets, and investments in one place. It started as a terminal-based application and evolved into a modern dark-themed web dashboard. It supports real-time stock and cryptocurrency price tracking via Yahoo Finance API.
 
 ---
 
@@ -35,7 +36,8 @@ Finance Tracker is a terminal-based personal finance application that helps you 
 | 🎯 Budget Goals | Set monthly spending limits per category |
 | 🔁 Recurring | Automate fixed monthly transactions |
 | 📊 Charts | Visualize income, expenses and trends |
-| 📈 Investments | Track BIST, NASDAQ and crypto portfolios |
+| 📈 Investments | Track BIST, NASDAQ and crypto portfolios in real-time |
+| 🌐 Web Dashboard | Modern dark-themed web interface |
 
 ---
 
@@ -46,22 +48,32 @@ finance-tracker/
 │   └── finance.db
 ├── src/
 │   ├── models/
-│   │   ├── __init__.py
 │   │   ├── database.py
 │   │   ├── category.py
 │   │   ├── transaction.py
 │   │   └── budget.py
 │   ├── services/
-│   │   ├── __init__.py
 │   │   ├── transaction_service.py
 │   │   ├── budget_service.py
 │   │   └── recurring_service.py
 │   ├── reports/
-│   │   ├── __init__.py
 │   │   └── charts.py
 │   └── investments/
-│       ├── __init__.py
 │       └── stock_tracker.py
+├── web/
+│   ├── templates/
+│   │   ├── base.html
+│   │   ├── index.html
+│   │   ├── summary.html
+│   │   ├── budget.html
+│   │   ├── investments.html
+│   │   └── categories.html
+│   ├── static/
+│   │   ├── css/style.css
+│   │   └── js/main.js
+│   ├── __init__.py
+│   └── routes.py
+├── app.py
 ├── main.py
 ├── config.py
 ├── requirements.txt
@@ -74,7 +86,7 @@ finance-tracker/
 
 **1. Clone the repository**
 ```bash
-git clone https://github.com/yourusername/finance-tracker.git
+git clone https://github.com/bilgenurpala/finance-tracker.git
 cd finance-tracker
 ```
 
@@ -83,7 +95,13 @@ cd finance-tracker
 py -m pip install -r requirements.txt
 ```
 
-**3. Run the application**
+**3a. Run the web application**
+```bash
+py app.py
+```
+Then open http://127.0.0.1:5000 in your browser.
+
+**3b. Run the terminal application**
 ```bash
 py main.py
 ```
@@ -92,37 +110,28 @@ py main.py
 
 ## 🚀 Usage
 
-After launching the app, navigate using the numbered menu:
-```
-Finance Tracker
-1.  Add Transaction
-2.  List Transactions
-3.  Monthly Summary
-4.  Add Category
-5.  List Categories
-6.  Add Budget Goal
-7.  Budget Status
-8.  Delete Transaction
-9.  Edit Transaction
-10. Add Recurring Transaction
-11. List Recurring Transactions
-12. Apply Recurring Transactions
-13. Chart: Income vs Expense
-14. Chart: Expenses by Category
-15. Chart: Monthly Trend
-16. Add Investment
-17. Portfolio Status
-18. Delete Investment
-0.  Exit
-```
+### Web Dashboard
+After launching `app.py`, navigate to `http://127.0.0.1:5000` and use the sidebar to access all features:
 
-**Example: Adding an investment**
+- **Transactions** — View monthly stats, add and delete transactions
+- **Summary** — Monthly income/expense breakdown
+- **Budget** — Set and track budget goals with progress bars
+- **Investments** — Add and track BIST, NASDAQ, and crypto portfolios
+- **Categories** — Manage income and expense categories
+
+### Terminal App
+After launching `main.py`, use the numbered menu:
 ```
-Choice: 16
-Symbol: THYAO
-Shares: 10
-Buy price: 150.0
-Market: bist
+1.  Add Transaction          10. Add Recurring Transaction
+2.  List Transactions        11. List Recurring Transactions
+3.  Monthly Summary          12. Apply Recurring Transactions
+4.  Add Category             13. Chart: Income vs Expense
+5.  List Categories          14. Chart: Expenses by Category
+6.  Add Budget Goal          15. Chart: Monthly Trend
+7.  Budget Status            16. Add Investment
+8.  Delete Transaction       17. Portfolio Status
+9.  Edit Transaction         18. Delete Investment
+0.  Exit
 ```
 
 ---
@@ -133,16 +142,20 @@ Market: bist
 |---|---|
 | Python 3.12 | Core language |
 | SQLite | Local database |
+| Flask | Web framework |
+| Jinja2 | HTML templating |
 | Rich | Terminal UI |
 | Matplotlib | Charts & graphs |
-| yfinance | Stock & crypto prices |
+| yfinance | Real-time stock & crypto prices |
 
 ---
 
 ## 🗺️ Roadmap
 
 - [x] Terminal application
-- [ ] Flask web interface
+- [x] Flask web interface
+- [x] Dark theme dashboard
+- [x] Real-time investment tracking
 - [ ] Django + React frontend
 - [ ] Multi-currency support
 - [ ] Export to CSV/PDF
