@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Budget Goals</h1>
+</div>
+
+<div class="card">
+    <h2>Add Budget Goal</h2>
+    <form action="/add-budget" method="POST">
+        <div class="form-row">
+            <div class="form-group">
+                <label>Category</label>
+                <select name="category_id" required>
+                    {% for c in categories %}
+                    <option value="{{ c.id }}">{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Amount</label>
+                <input type="number" name="amount" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label>Month</label>
+                <input type="month" name="month" value="{{ month }}">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Budget</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Budget Status - {{ month }}</h2>
+    <form method="GET" action="/budget">
+        <div class="form-row">
+            <div class="form-group">
+                <label>Month</label>
+                <input type="month" name="month" value="{{ month }}">
+            </div>
+            <button type="submit" class="btn btn-primary">View</button>
+        </div>
+    </form>
+
+    {% if status %}
+    <table>
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Budget</th>
+                <th>Spent</th>
+                <th>Remaining</th>
+                <th>Usage %</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in status %}
+            <tr>
+                <td>{{ s.category }}</td>
+                <td>{{ s.budget }}</td>
+                <td>{{ s.spent }}</td>
+                <td class="{{ 'amount-income' if s.remaining >= 0 else 'amount-expense' }}">{{ s.remaining }}</td>
+                <td>
+                    <div class="progress-bar">
+                        <div class="progress {{ 'progress-danger' if s.percentage > 100 else 'progress-warning' if s.percentage > 80 else 'progress-ok' }}"
+                             style="width: {{ [s.percentage, 100] | min }}%">
+                        </div>
+                    </div>
+                    {{ s.percentage }}%
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="empty-message">No budget goals found for this month.</p>
+    {% endif %}
+</div>
+{% endblock %}
