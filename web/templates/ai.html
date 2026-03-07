@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+{% block title %}AI Assistant{% endblock %}
+{% block page_heading %}AI Assistant{% endblock %}
+
+{% block content %}
+
+<div class="ai-hero">
+    <div>
+        <h1>✦ AI Financial Assistant</h1>
+        <p>Powered by <span>Claude</span> — intelligent analysis for your finances</p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:0.375rem; align-items:flex-end;">
+        <label style="font-size:0.68rem; font-weight:600; color:var(--text-3); text-transform:uppercase; letter-spacing:0.5px;">Analysis Month</label>
+        <input type="month" id="month-input" value="{{ month }}"
+               style="padding:0.5rem 0.875rem; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-family:var(--mono); font-size:0.875rem; outline:none; cursor:pointer;">
+    </div>
+</div>
+
+<div class="ai-cards-row">
+    <div class="ai-action-card" onclick="runAnalysis()">
+        <div class="ai-action-icon">📊</div>
+        <div class="ai-action-title">Spending Analysis</div>
+        <div class="ai-action-desc">Detailed breakdown of your monthly expenses with AI-powered insights</div>
+        <div class="ai-action-cta">Run Analysis →</div>
+    </div>
+    <div class="ai-action-card" onclick="runSavings()">
+        <div class="ai-action-icon">💡</div>
+        <div class="ai-action-title">Savings Tips</div>
+        <div class="ai-action-desc">Personalized recommendations based on your actual spending habits</div>
+        <div class="ai-action-cta">Get Tips →</div>
+    </div>
+    <div class="ai-action-card" onclick="document.getElementById('nl-input').focus()">
+        <div class="ai-action-icon">💬</div>
+        <div class="ai-action-title">Natural Language</div>
+        <div class="ai-action-desc">Type transactions in plain Turkish or English — AI parses them instantly</div>
+        <div class="ai-action-cta">Try It →</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">Add Transaction with Natural Language</span>
+    </div>
+    <div class="nl-input-row">
+        <input type="text" id="nl-input" class="nl-input"
+               placeholder="e.g.  'bugün 150 TL markete harcadım'  or  'received 5000 TL salary today'">
+        <button class="btn btn-primary" onclick="parseTransaction()">Parse with AI</button>
+    </div>
+    <div class="nl-parsed" id="nl-result" style="display:none;">
+        <div class="nl-parsed-label">✓ Transaction Parsed — Review & Confirm</div>
+        <div class="form-row" style="margin-bottom:1rem;">
+            <div class="form-group">
+                <label>Amount (TL)</label>
+                <input type="number" id="parsed-amount" step="0.01">
+            </div>
+            <div class="form-group" style="flex:1; min-width:160px;">
+                <label>Description</label>
+                <input type="text" id="parsed-description">
+            </div>
+            <div class="form-group">
+                <label>Type</label>
+                <select id="parsed-type">
+                    <option value="expense">Expense</option>
+                    <option value="income">Income</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Date</label>
+                <input type="date" id="parsed-date">
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select id="parsed-category">
+                    {% for c in categories %}
+                    <option value="{{ c.id }}">{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:0.625rem;">
+            <button class="btn btn-ghost" onclick="document.getElementById('nl-result').style.display='none'">Cancel</button>
+            <button class="btn btn-primary" onclick="confirmTransaction()">✓ Add Transaction</button>
+        </div>
+    </div>
+</div>
+
+<div id="ai-loading" style="display:none;">
+    <div class="card">
+        <div class="ai-loading-box">
+            <div class="ai-dots"><span></span><span></span><span></span></div>
+            <div class="ai-loading-text">Claude is analyzing your financial data...</div>
+        </div>
+    </div>
+</div>
+
+<div class="ai-output-section" id="ai-output" style="display:none;">
+    <div class="ai-output-bar">
+        <div class="ai-status">
+            <div class="ai-dot"></div>
+            AI Analysis Complete
+        </div>
+        <div class="ai-output-label" id="ai-output-label">Spending Analysis</div>
+    </div>
+    <div class="ai-output-body">
+        <div class="ai-result" id="ai-result"></div>
+    </div>
+</div>
+
+<script>
+async function runAnalysis() {
+    const month = document.getElementById("month-input").value;
+    document.getElementById("ai-output-label").textContent = "Spending Analysis · " + month;
+    showLoading();
+    const res = await fetch("/ai/analyze", {
+        method: "POST",
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: `month=${month}`
+    });
+    const data = await res.json();
+    showResult(data.success ? data.result : "Error: " + data.error);
+}
+
+async function runSavings() {
+    const month = document.getElementById("month-input").value;
+    document.getElementById("ai-output-label").textContent = "Savings Tips · " + month;
+    showLoading();
+    const res = await fetch("/ai/savings", {
+        method: "POST",
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: `month=${month}`
+    });
+    const data = await res.json();
+    showResult(data.success ? data.result : "Error: " + data.error);
+}
+
+async function parseTransaction() {
+    const text = document.getElementById("nl-input").value.trim();
+    if (!text) return;
+    const res = await fetch("/ai/parse-transaction", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({text})
+    });
+    const data = await res.json();
+    if (data.success) {
+        const r = data.result;
+        document.getElementById("parsed-amount").value = r.amount;
+        document.getElementById("parsed-description").value = r.description;
+        document.getElementById("parsed-type").value = r.type;
+        document.getElementById("parsed-date").value = r.date || new Date().toISOString().split("T")[0];
+        document.getElementById("nl-result").style.display = "block";
+    }
+}
+
+async function confirmTransaction() {
+    const fields = {
+        amount: document.getElementById("parsed-amount").value,
+        description: document.getElementById("parsed-description").value,
+        type: document.getElementById("parsed-type").value,
+        date: document.getElementById("parsed-date").value,
+        category_id: document.getElementById("parsed-category").value
+    };
+    const form = document.createElement("form");
+    form.method = "POST"; form.action = "/add-transaction";
+    for (const [k, v] of Object.entries(fields)) {
+        const i = document.createElement("input");
+        i.type = "hidden"; i.name = k; i.value = v;
+        form.appendChild(i);
+    }
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function showLoading() {
+    document.getElementById("ai-loading").style.display = "block";
+    document.getElementById("ai-output").style.display = "none";
+    document.getElementById("ai-loading").scrollIntoView({behavior:"smooth", block:"center"});
+}
+
+function showResult(text) {
+    document.getElementById("ai-loading").style.display = "none";
+    const output = document.getElementById("ai-output");
+    output.style.display = "block";
+    const resultEl = document.getElementById("ai-result");
+
+    const lines = text.split('\n');
+    let html = '', inTable = false, tableRows = [];
+
+    for (let line of lines) {
+        if (line.trim().startsWith('|')) {
+            if (!inTable) { inTable = true; tableRows = []; }
+            if (!line.includes('---')) tableRows.push(line);
+            continue;
+        }
+        if (inTable) { html += renderTable(tableRows); tableRows = []; inTable = false; }
+
+        line = line.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>');
+
+        if      (/^#### /.test(line)) html += line.replace(/^#### (.*)/,'<h4>$1</h4>');
+        else if (/^### /.test(line))  html += line.replace(/^### (.*)/,'<h3>$1</h3>');
+        else if (/^## /.test(line))   html += line.replace(/^## (.*)/,'<h2>$1</h2>');
+        else if (/^# /.test(line))    html += line.replace(/^# (.*)/,'<h1>$1</h1>');
+        else if (/^> /.test(line))    html += line.replace(/^> (.*)/,'<blockquote>$1</blockquote>');
+        else if (/^[-*] /.test(line)) html += line.replace(/^[-*] (.*)/,'<li>$1</li>');
+        else if (/^\d+\. /.test(line)) html += '<li>'+line.replace(/^\d+\. /,'')+'</li>';
+        else if (line.trim()==='---') html += '<hr>';
+        else if (line.trim()==='')    html += '<br>';
+        else html += '<p>'+line+'</p>';
+    }
+    if (inTable) html += renderTable(tableRows);
+    resultEl.innerHTML = html;
+    output.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function renderTable(rows) {
+    if (!rows.length) return '';
+    let html = '<table><thead><tr>';
+    rows[0].split('|').filter(c=>c.trim()).forEach(h=>{
+        html += `<th>${h.trim().replace(/\*\*(.*?)\*\*/g,'$1')}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+    for (let i=1; i<rows.length; i++) {
+        const cells = rows[i].split('|').filter(c=>c.trim());
+        if (!cells.length) continue;
+        html += '<tr>';
+        cells.forEach(c=>html+=`<td>${c.trim().replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</td>`);
+        html += '</tr>';
+    }
+    return html+'</tbody></table>';
+}
+</script>
+{% endblock %}

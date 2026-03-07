@@ -1,10 +1,11 @@
 # 💰 FinTrack
 
-> A Python-based personal finance management application with a modern web dashboard and real-time investment portfolio tracking.
+> A full-stack personal finance management application with a professional dark SaaS dashboard, AI-powered insights, and real-time investment tracking.
 
 ![Python](https://img.shields.io/badge/Python-3.12+-blue?logo=python)
 ![Flask](https://img.shields.io/badge/Flask-3.0+-lightgrey?logo=flask)
 ![SQLite](https://img.shields.io/badge/Database-SQLite-lightgrey?logo=sqlite)
+![Claude AI](https://img.shields.io/badge/AI-Claude%20API-orange?logo=anthropic)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
@@ -12,6 +13,7 @@
 ## 📋 Table of Contents
 
 - [Overview](#overview)
+- [Screenshots](#screenshots)
 - [Features](#features)
 - [Project Structure](#project-structure)
 - [Installation](#installation)
@@ -23,7 +25,35 @@
 
 ## 🔍 Overview
 
-FinTrack is a personal finance application that helps you manage income, expenses, budgets, and investments in one place. It started as a terminal-based application and evolved into a modern dark-themed web dashboard. It supports real-time stock and cryptocurrency price tracking via Yahoo Finance API.
+FinTrack is a personal finance application that helps you manage income, expenses, budgets, and investments in one place. It features a professional dark-themed SaaS dashboard with interactive Chart.js visualizations and an AI assistant powered by the Claude API for spending analysis, savings tips, and natural language transaction parsing.
+
+---
+
+## 📸 Screenshots
+
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
+
+### Analytics
+![Analytics](screenshots/analytics.png)
+
+### Budget
+![Budget](screenshots/budget.png)
+
+### Investments
+![Investments](screenshots/investments.png)
+
+### Categories
+![Categories](screenshots/categories.png)
+
+### AI Assistant
+![AI Assistant](screenshots/ai-assistant.png)
+
+### AI Spending Analysis
+![AI Analysis](screenshots/ai-analysis.png)
+
+### AI Savings Tips
+![AI Savings](screenshots/ai-savings.png)
 
 ---
 
@@ -33,19 +63,30 @@ FinTrack is a personal finance application that helps you manage income, expense
 |---|---|
 | 💸 Transactions | Add, edit, delete income & expense records |
 | 🗂️ Categories | Organize transactions by custom categories |
-| 🎯 Budget Goals | Set monthly spending limits per category |
-| 🔁 Recurring | Automate fixed monthly transactions |
-| 📊 Charts | Visualize income, expenses and trends |
-| 📈 Investments | Track BIST, NASDAQ and crypto portfolios in real-time |
-| 🌐 Web Dashboard | Modern dark-themed web interface |
+| 🎯 Budget Goals | Set monthly spending limits with progress tracking |
+| 📊 Charts | Interactive Chart.js visualizations across all pages |
+| 📈 Investments | Track BIST, NYSE/NASDAQ and crypto portfolios in real-time |
+| 🤖 AI Assistant | Claude-powered spending analysis, savings tips & natural language input |
+| 💬 Natural Language | Add transactions by typing plain text ("spent 150 TL on groceries") |
+| 🌐 Web Dashboard | Professional dark SaaS interface with Sora typography |
 
 ---
 
 ## 📁 Project Structure
+
 ```
 finance-tracker/
 ├── data/
 │   └── finance.db
+├── screenshots/
+│   ├── dashboard.png
+│   ├── analytics.png
+│   ├── budget.png
+│   ├── investments.png
+│   ├── categories.png
+│   ├── ai-assistant.png
+│   ├── ai-analysis.png
+│   └── ai-savings.png
 ├── src/
 │   ├── models/
 │   │   ├── database.py
@@ -55,7 +96,8 @@ finance-tracker/
 │   ├── services/
 │   │   ├── transaction_service.py
 │   │   ├── budget_service.py
-│   │   └── recurring_service.py
+│   │   ├── recurring_service.py
+│   │   └── ai_service.py
 │   ├── reports/
 │   │   └── charts.py
 │   └── investments/
@@ -67,7 +109,8 @@ finance-tracker/
 │   │   ├── summary.html
 │   │   ├── budget.html
 │   │   ├── investments.html
-│   │   └── categories.html
+│   │   ├── categories.html
+│   │   └── ai.html
 │   ├── static/
 │   │   ├── css/style.css
 │   │   └── js/main.js
@@ -95,13 +138,25 @@ cd finance-tracker
 py -m pip install -r requirements.txt
 ```
 
-**3a. Run the web application**
+**3. Configure API key**
+
+Create a `config.py` file in the root directory:
+```python
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE_PATH = os.path.join(BASE_DIR, "data", "finance.db")
+CURRENCY = "TL"
+ANTHROPIC_API_KEY = "your-api-key-here"  # Get from console.anthropic.com
+```
+
+**4a. Run the web application**
 ```bash
 py app.py
 ```
 Then open http://127.0.0.1:5000 in your browser.
 
-**3b. Run the terminal application**
+**4b. Run the terminal application**
 ```bash
 py main.py
 ```
@@ -113,26 +168,23 @@ py main.py
 ### Web Dashboard
 After launching `app.py`, navigate to `http://127.0.0.1:5000` and use the sidebar to access all features:
 
-- **Transactions** — View monthly stats, add and delete transactions
-- **Summary** — Monthly income/expense breakdown
-- **Budget** — Set and track budget goals with progress bars
-- **Investments** — Add and track BIST, NASDAQ, and crypto portfolios
+- **Dashboard** — Monthly stats, income vs expense chart, category breakdown
+- **Analytics** — Monthly summary with interactive charts
+- **Budget** — Set and track budget goals with progress bars and charts
+- **Investments** — Add and track BIST, NYSE/NASDAQ, and crypto portfolios with P&L charts
 - **Categories** — Manage income and expense categories
+- **AI Assistant** — Claude-powered spending analysis, savings tips, and natural language transaction input
+
+### AI Assistant
+Navigate to `/ai` to use AI features:
+- **Spending Analysis** — Detailed monthly breakdown with insights
+- **Savings Tips** — Personalized recommendations based on your data
+- **Natural Language Input** — Type transactions in plain text:
+  - `"spent 200 TL on groceries today"`
+  - `"received 5000 TL salary"`
 
 ### Terminal App
-After launching `main.py`, use the numbered menu:
-```
-1.  Add Transaction          10. Add Recurring Transaction
-2.  List Transactions        11. List Recurring Transactions
-3.  Monthly Summary          12. Apply Recurring Transactions
-4.  Add Category             13. Chart: Income vs Expense
-5.  List Categories          14. Chart: Expenses by Category
-6.  Add Budget Goal          15. Chart: Monthly Trend
-7.  Budget Status            16. Add Investment
-8.  Delete Transaction       17. Portfolio Status
-9.  Edit Transaction         18. Delete Investment
-0.  Exit
-```
+After launching `main.py`, use the numbered menu to access all features including transactions, budgets, investments, and charts.
 
 ---
 
@@ -141,12 +193,15 @@ After launching `main.py`, use the numbered menu:
 | Tool | Purpose |
 |---|---|
 | Python 3.12 | Core language |
-| SQLite | Local database |
 | Flask | Web framework |
+| SQLite | Local database |
 | Jinja2 | HTML templating |
-| Rich | Terminal UI |
-| Matplotlib | Charts & graphs |
+| Chart.js | Interactive charts |
+| Claude API | AI spending analysis & NLP |
+| Anthropic SDK | Claude API client |
 | yfinance | Real-time stock & crypto prices |
+| Rich | Terminal UI |
+| Matplotlib | Terminal charts |
 
 ---
 
@@ -154,12 +209,15 @@ After launching `main.py`, use the numbered menu:
 
 - [x] Terminal application
 - [x] Flask web interface
-- [x] Dark theme dashboard
-- [x] Real-time investment tracking
-- [ ] Django + React frontend
+- [x] Professional dark SaaS dashboard
+- [x] Interactive Chart.js visualizations
+- [x] Real-time investment tracking with P&L
+- [x] AI-powered spending analysis (Claude API)
+- [x] Natural language transaction input
+- [ ] User authentication (JWT)
+- [ ] Landing page
 - [ ] Multi-currency support
 - [ ] Export to CSV/PDF
-- [ ] User authentication
 
 ---
 
