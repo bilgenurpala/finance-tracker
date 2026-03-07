@@ -1,43 +1,69 @@
 {% extends "base.html" %}
-{% block title %}Transactions{% endblock %}
+{% block title %}Dashboard{% endblock %}
+{% block page_heading %}Dashboard{% endblock %}
 
 {% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 
-<div class="stats-grid">
-    <div class="stat-card">
+<!-- Stats Row -->
+<div class="stats-row">
+    <div class="stat-card income">
         <div class="stat-label">Total Income</div>
-        <div class="stat-value income">{{ summary.total_income }}</div>
-        <div class="stat-sub">{{ current_month }}</div>
+        <div class="stat-value">{{ "{:,.0f}".format(summary.total_income) }}</div>
+        <div class="stat-sub">{{ current_month }} · TL</div>
     </div>
-    <div class="stat-card">
-        <div class="stat-label">Total Expense</div>
-        <div class="stat-value expense">{{ summary.total_expense }}</div>
-        <div class="stat-sub">{{ current_month }}</div>
+    <div class="stat-card expense">
+        <div class="stat-label">Total Expenses</div>
+        <div class="stat-value">{{ "{:,.0f}".format(summary.total_expense) }}</div>
+        <div class="stat-sub">{{ current_month }} · TL</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card balance">
         <div class="stat-label">Balance</div>
-        <div class="stat-value balance">{{ summary.balance }}</div>
-        <div class="stat-sub">{{ current_month }}</div>
+        <div class="stat-value">{{ "{:,.0f}".format(summary.balance) }}</div>
+        <div class="stat-sub">{{ current_month }} · TL</div>
     </div>
 </div>
 
+<!-- Charts Row -->
+<div class="charts-grid">
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Income vs Expenses</span>
+        </div>
+        <div class="chart-container">
+            <canvas id="balanceChart"></canvas>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Expenses by Category</span>
+        </div>
+        <div class="chart-container">
+            <canvas id="categoryChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Add Transaction + Transaction List -->
 <div class="card">
-    <h2>Add Transaction</h2>
-    <form action="/add-transaction" method="POST">
+    <div class="card-header">
+        <span class="card-title">Add Transaction</span>
+    </div>
+    <form method="POST" action="/add-transaction">
         <div class="form-row">
             <div class="form-group">
-                <label>Amount</label>
-                <input type="number" name="amount" step="0.01" placeholder="0.00" required>
+                <label>Amount (TL)</label>
+                <input type="number" name="amount" step="0.01" min="0" placeholder="0.00" required>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="flex:1; min-width:180px;">
                 <label>Description</label>
                 <input type="text" name="description" placeholder="e.g. Grocery shopping" required>
             </div>
             <div class="form-group">
                 <label>Category</label>
                 <select name="category_id" required>
-                    {% for c in categories %}
-                    <option value="{{ c.id }}">{{ c.name }}</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}">{{ cat.name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -52,7 +78,7 @@
                 <label>Date</label>
                 <input type="date" name="date">
             </div>
-            <div class="form-group" style="justify-content: flex-end;">
+            <div class="form-group" style="justify-content:flex-end;">
                 <button type="submit" class="btn btn-primary">+ Add</button>
             </div>
         </div>
@@ -60,42 +86,129 @@
 </div>
 
 <div class="card">
-    <h2>Transaction List</h2>
+    <div class="card-header">
+        <span class="card-title">Recent Transactions</span>
+        <span style="font-size:0.72rem; color:var(--text-3);">{{ transactions|length }} total</span>
+    </div>
     {% if transactions %}
-    <table>
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Type</th>
-                <th>Category</th>
-                <th>Description</th>
-                <th>Amount</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for t in transactions %}
-            <tr>
-                <td class="text-muted">{{ t.date }}</td>
-                <td>
-                    <span class="badge {{ 'badge-income' if t.type == 'income' else 'badge-expense' }}">
-                        {{ t.type }}
-                    </span>
-                </td>
-                <td>{{ t.category or '-' }}</td>
-                <td>{{ t.description or '-' }}</td>
-                <td class="{{ 'amount-income' if t.type == 'income' else 'amount-expense' }}">
-                    {{ t.amount }}
-                </td>
-                <td>
-                    <a href="/delete-transaction/{{ t.id }}" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in transactions %}
+                <tr>
+                    <td style="font-family:var(--mono); font-size:0.78rem; color:var(--text-2);">{{ t.date or '—' }}</td>
+                    <td><span class="badge badge-{{ t.type }}">{{ t.type }}</span></td>
+                    <td style="color:var(--text-2);">{{ t.category or '—' }}</td>
+                    <td>{{ t.description }}</td>
+                    <td class="amount-{{ t.type }}">{{ "{:,.2f}".format(t.amount) }}</td>
+                    <td><a href="/delete-transaction/{{ t.id }}" class="btn btn-danger" onclick="return confirm('Delete this transaction?')">Delete</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% else %}
-    <p class="empty-message">No transactions yet.</p>
+    <div class="empty">
+        <div class="empty-icon">📭</div>
+        No transactions yet. Add your first one above.
+    </div>
     {% endif %}
 </div>
+
+<script>
+Chart.defaults.color = '#475569';
+Chart.defaults.borderColor = '#1e2740';
+Chart.defaults.font.family = "'DM Mono', monospace";
+
+// Income vs Expenses Bar Chart
+const balanceCtx = document.getElementById('balanceChart').getContext('2d');
+new Chart(balanceCtx, {
+    type: 'bar',
+    data: {
+        labels: ['This Month'],
+        datasets: [
+            {
+                label: 'Income',
+                data: [{{ summary.total_income }}],
+                backgroundColor: 'rgba(20,184,166,0.7)',
+                borderColor: '#14b8a6',
+                borderWidth: 1,
+                borderRadius: 6,
+            },
+            {
+                label: 'Expenses',
+                data: [{{ summary.total_expense }}],
+                backgroundColor: 'rgba(244,63,94,0.7)',
+                borderColor: '#f43f5e',
+                borderWidth: 1,
+                borderRadius: 6,
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'top', labels: { boxWidth: 10, padding: 16, font: { size: 11 } } }
+        },
+        scales: {
+            y: {
+                grid: { color: 'rgba(30,39,64,0.8)' },
+                ticks: { font: { size: 10 } }
+            },
+            x: { grid: { display: false } }
+        }
+    }
+});
+
+// Expenses by Category Doughnut
+const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+const transactions = {{ transactions | tojson }};
+const expenseMap = {};
+transactions.forEach(t => {
+    if (t.type === 'expense') {
+        const cat = t.category || 'Uncategorized';
+        expenseMap[cat] = (expenseMap[cat] || 0) + parseFloat(t.amount);
+    }
+});
+
+const catLabels = Object.keys(expenseMap);
+const catValues = Object.values(expenseMap);
+const palette = ['#3b82f6','#14b8a6','#f43f5e','#f59e0b','#8b5cf6','#ec4899','#06b6d4','#84cc16'];
+
+if (catLabels.length > 0) {
+    new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: {
+            labels: catLabels,
+            datasets: [{
+                data: catValues,
+                backgroundColor: palette.slice(0, catLabels.length).map(c => c + 'cc'),
+                borderColor: palette.slice(0, catLabels.length),
+                borderWidth: 1,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: { position: 'right', labels: { boxWidth: 10, padding: 12, font: { size: 11 } } }
+            }
+        }
+    });
+} else {
+    categoryCtx.canvas.parentElement.innerHTML = '<div class="empty"><div class="empty-icon">📊</div>No expense data yet</div>';
+}
+</script>
 {% endblock %}

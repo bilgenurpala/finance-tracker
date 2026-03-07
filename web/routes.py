@@ -1,9 +1,10 @@
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from datetime import date
 from src.services.transaction_service import add_transaction, list_transactions, remove_transaction, get_monthly_summary, edit_transaction
 from src.models.category import create_category, get_all_categories, delete_category
 from src.services.budget_service import add_budget, get_budget_status
 from src.investments.stock_tracker import add_investment, get_all_investments, delete_investment, get_portfolio_status
+from src.services.ai_service import analyze_spending, parse_natural_language_transaction, get_savings_tips
 
 main = Blueprint("main", __name__)
 
@@ -86,3 +87,36 @@ def add_category_route():
 def delete_category_route(category_id):
     delete_category(category_id)
     return redirect(url_for("main.categories"))
+
+@main.route("/ai")
+def ai():
+    month = request.args.get("month", date.today().strftime("%Y-%m"))
+    categories = [dict(c) for c in get_all_categories()]
+    return render_template("ai.html", month=month, categories=categories)
+
+@main.route("/ai/analyze", methods=["POST"])
+def ai_analyze():
+    month = request.form["month"]
+    try:
+        analysis = analyze_spending(month)
+        return jsonify({"success": True, "result": analysis})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+@main.route("/ai/savings", methods=["POST"])
+def ai_savings():
+    month = request.form["month"]
+    try:
+        tips = get_savings_tips(month)
+        return jsonify({"success": True, "result": tips})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+@main.route("/ai/parse-transaction", methods=["POST"])
+def ai_parse_transaction():
+    text = request.json.get("text", "")
+    try:
+        result = parse_natural_language_transaction(text)
+        return jsonify({"success": True, "result": result})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
