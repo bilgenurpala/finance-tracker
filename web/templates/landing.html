@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinTrack — Smart Personal Finance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:        #060910;
+            --bg-1:      #0b0f1a;
+            --bg-2:      #111827;
+            --border:    rgba(255,255,255,0.07);
+            --accent:    #3b82f6;
+            --accent-2:  #14b8a6;
+            --accent-3:  #8b5cf6;
+            --red:       #f43f5e;
+            --text:      #f1f5f9;
+            --text-2:    #94a3b8;
+            --text-3:    #475569;
+            --mono:      'DM Mono', monospace;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Sora', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* ── NOISE TEXTURE OVERLAY ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        /* ── NAV ── */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 4rem;
+            border-bottom: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        nav.scrolled {
+            background: rgba(6,9,16,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom-color: var(--border);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-logo-icon {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-3));
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-2);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover { color: var(--text); }
+
+        .nav-cta {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.55rem 1.25rem;
+            border-radius: 8px;
+            font-family: 'Sora', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-2);
+            border: 1px solid var(--border);
+        }
+
+        .btn-ghost:hover {
+            color: var(--text);
+            border-color: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.04);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(59,130,246,0.35);
+        }
+
+        .btn-lg {
+            padding: 0.85rem 2rem;
+            font-size: 0.9rem;
+            border-radius: 10px;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 8rem 2rem 6rem;
+            overflow: hidden;
+        }
+
+        /* Glow orbs */
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 700px;
+            height: 500px;
+            background: radial-gradient(ellipse, rgba(59,130,246,0.12) 0%, rgba(139,92,246,0.06) 50%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.9rem;
+            background: rgba(59,130,246,0.1);
+            border: 1px solid rgba(59,130,246,0.25);
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            animation: fadeUp 0.6s ease both;
+        }
+
+        .hero-badge span { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.8rem, 6vw, 5rem);
+            font-weight: 800;
+            line-height: 1.08;
+            letter-spacing: -0.04em;
+            max-width: 800px;
+            animation: fadeUp 0.6s 0.1s ease both;
+        }
+
+        .hero h1 .grad {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-3) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-sub {
+            margin-top: 1.5rem;
+            font-size: 1.1rem;
+            color: var(--text-2);
+            max-width: 520px;
+            line-height: 1.7;
+            font-weight: 400;
+            animation: fadeUp 0.6s 0.2s ease both;
+        }
+
+        .hero-actions {
+            margin-top: 2.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            animation: fadeUp 0.6s 0.3s ease both;
+        }
+
+        .hero-meta {
+            margin-top: 1.5rem;
+            font-size: 0.75rem;
+            color: var(--text-3);
+            font-family: var(--mono);
+            animation: fadeUp 0.6s 0.4s ease both;
+        }
+
+        /* ── DASHBOARD PREVIEW ── */
+        .preview-wrap {
+            position: relative;
+            margin-top: 5rem;
+            width: 100%;
+            max-width: 1000px;
+            animation: fadeUp 0.8s 0.5s ease both;
+        }
+
+        .preview-glow {
+            position: absolute;
+            inset: -1px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(59,130,246,0.4), rgba(139,92,246,0.2), rgba(20,184,166,0.2));
+            filter: blur(1px);
+            z-index: 0;
+        }
+
+        .preview-inner {
+            position: relative;
+            z-index: 1;
+            background: var(--bg-1);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .preview-bar {
+            background: var(--bg-2);
+            padding: 0.6rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .preview-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+        .preview-bar img, .preview-inner img {
+            width: 100%;
+            display: block;
+        }
+
+        /* ── STATS STRIP ── */
+        .stats-strip {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-1);
+        }
+
+        .stat-item {
+            flex: 1;
+            max-width: 220px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            border-right: 1px solid var(--border);
+        }
+
+        .stat-item:last-child { border-right: none; }
+
+        .stat-num {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            font-family: var(--mono);
+            background: linear-gradient(135deg, var(--text), var(--text-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            margin-top: 0.4rem;
+            font-size: 0.78rem;
+            color: var(--text-3);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        /* ── SECTION ── */
+        section {
+            position: relative;
+            z-index: 1;
+            padding: 7rem 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            font-family: var(--mono);
+        }
+
+        .section-title {
+            font-size: clamp(1.8rem, 3vw, 2.6rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.15;
+            max-width: 560px;
+        }
+
+        .section-sub {
+            margin-top: 1rem;
+            font-size: 1rem;
+            color: var(--text-2);
+            max-width: 480px;
+            line-height: 1.7;
+        }
+
+        /* ── FEATURES ── */
+        .features-grid {
+            margin-top: 4rem;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .feature-card {
+            background: var(--bg-1);
+            padding: 2rem;
+            transition: background 0.2s;
+        }
+
+        .feature-card:hover { background: var(--bg-2); }
+
+        .feature-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .feature-card h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+            font-size: 0.82rem;
+            color: var(--text-2);
+            line-height: 1.6;
+        }
+
+        /* ── SCREENSHOTS ── */
+        .screenshots-grid {
+            margin-top: 4rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .shot-card {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: var(--bg-1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .shot-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        .shot-card.featured {
+            grid-column: 1 / -1;
+        }
+
+        .shot-label {
+            padding: 0.75rem 1rem;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-3);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border-bottom: 1px solid var(--border);
+            font-family: var(--mono);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .shot-label::before {
+            content: '';
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--accent-2);
+        }
+
+        .shot-card img {
+            width: 100%;
+            display: block;
+        }
+
+        /* ── AI SECTION ── */
+        .ai-section {
+            background: var(--bg-1);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .ai-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 7rem 4rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5rem;
+            align-items: center;
+        }
+
+        .ai-features {
+            margin-top: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .ai-feature {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .ai-feature-icon {
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            background: rgba(59,130,246,0.1);
+            border: 1px solid rgba(59,130,246,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .ai-feature h4 {
+            font-size: 0.88rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .ai-feature p {
+            font-size: 0.8rem;
+            color: var(--text-2);
+            line-height: 1.5;
+        }
+
+        .ai-visual {
+            position: relative;
+        }
+
+        .ai-card {
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.5rem;
+        }
+
+        .ai-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .ai-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: pulse 2s infinite;
+        }
+
+        .ai-card-header span {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-2);
+            font-family: var(--mono);
+        }
+
+        .ai-lines { display: flex; flex-direction: column; gap: 0.6rem; }
+
+        .ai-line {
+            height: 10px;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.06);
+        }
+
+        .ai-line.w-full { width: 100%; }
+        .ai-line.w-4-5 { width: 82%; }
+        .ai-line.w-3-4 { width: 73%; }
+        .ai-line.w-half { width: 50%; }
+        .ai-line.accent { background: rgba(59,130,246,0.25); }
+        .ai-line.teal { background: rgba(20,184,166,0.2); }
+
+        .ai-table {
+            margin-top: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .ai-table-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.72rem;
+            font-family: var(--mono);
+            border-bottom: 1px solid var(--border);
+            gap: 0.5rem;
+        }
+
+        .ai-table-row:last-child { border-bottom: none; }
+        .ai-table-row.header { color: var(--text-3); background: rgba(255,255,255,0.02); }
+        .ai-table-row .green { color: #4ade80; }
+        .ai-table-row .red { color: var(--red); }
+
+        /* ── CTA ── */
+        .cta-section {
+            text-align: center;
+            padding: 8rem 4rem;
+        }
+
+        .cta-glow {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px; height: 300px;
+            background: radial-gradient(ellipse, rgba(59,130,246,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .cta-section h2 {
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            max-width: 600px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .cta-section p {
+            color: var(--text-2);
+            max-width: 400px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.7;
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            position: relative;
+            z-index: 1;
+            border-top: 1px solid var(--border);
+            padding: 2rem 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        footer .logo {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-2);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+
+        footer p {
+            font-size: 0.75rem;
+            color: var(--text-3);
+            font-family: var(--mono);
+        }
+
+        footer .footer-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        footer .footer-links a {
+            font-size: 0.78rem;
+            color: var(--text-3);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        footer .footer-links a:hover { color: var(--text-2); }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+    <a href="/" class="nav-logo">
+        <div class="nav-logo-icon">💰</div>
+        FinTrack
+    </a>
+    <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#screenshots">Screenshots</a></li>
+        <li><a href="#ai">AI Assistant</a></li>
+    </ul>
+    <div class="nav-cta">
+        <a href="/login" class="btn btn-ghost">Log in</a>
+        <a href="/register" class="btn btn-primary">Get Started</a>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-badge">
+        <span></span>
+        Powered by Claude AI
+    </div>
+    <h1>Your finances,<br><span class="grad">finally under control</span></h1>
+    <p class="hero-sub">Track income, expenses, budgets and investments in one place — with AI-powered insights that actually make sense.</p>
+    <div class="hero-actions">
+        <a href="/dashboard" class="btn btn-primary btn-lg">Open Dashboard →</a>
+        <a href="#screenshots" class="btn btn-ghost btn-lg">See how it works</a>
+    </div>
+    <p class="hero-meta">Python · Flask · SQLite · Claude API</p>
+</section>
+
+<!-- STATS STRIP -->
+<div class="stats-strip">
+    <div class="stat-item">
+        <div class="stat-num">6+</div>
+        <div class="stat-label">Dashboard views</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-num">3</div>
+        <div class="stat-label">AI features</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-num">Real-time</div>
+        <div class="stat-label">Investment prices</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Local & private</div>
+    </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+    <div class="section-label">Features</div>
+    <h2 class="section-title reveal">Everything you need to manage your money</h2>
+    <p class="section-sub reveal">From daily transactions to investment portfolios — all in a clean, fast interface.</p>
+
+    <div class="features-grid reveal">
+        <div class="feature-card">
+            <div class="feature-icon" style="background:rgba(59,130,246,0.1);">💸</div>
+            <h3>Transactions</h3>
+            <p>Add, edit and delete income & expense records with categories, descriptions and dates.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:rgba(20,184,166,0.1);">🎯</div>
+            <h3>Budget Goals</h3>
+            <p>Set monthly spending limits per category. Visual progress bars show exactly where you stand.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:rgba(139,92,246,0.1);">📊</div>
+            <h3>Interactive Charts</h3>
+            <p>Chart.js-powered visualizations across all pages — bar charts, doughnuts, and trend lines.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:rgba(245,158,11,0.1);">📈</div>
+            <h3>Investments</h3>
+            <p>Track BIST, NYSE/NASDAQ and crypto portfolios with live prices and P&L calculations.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:rgba(244,63,94,0.1);">🗂️</div>
+            <h3>Categories</h3>
+            <p>Organize transactions into custom income and expense categories that fit your lifestyle.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:rgba(59,130,246,0.1);">🔁</div>
+            <h3>Recurring Transactions</h3>
+            <p>Automate fixed monthly payments like rent, subscriptions and salary entries.</p>
+        </div>
+    </div>
+</section>
+
+<!-- SCREENSHOTS -->
+<section id="screenshots" style="padding-top:0;">
+    <div class="section-label reveal">Screenshots</div>
+    <h2 class="section-title reveal">See it in action</h2>
+
+    <div class="screenshots-grid">
+        <div class="shot-card featured reveal">
+            <div class="shot-label">Dashboard</div>
+            <img src="/static/screenshots/dashboard.png" alt="Dashboard" onerror="this.style.display='none'; this.parentElement.style.background='#111827'; this.parentElement.style.minHeight='220px'">
+        </div>
+        <div class="shot-card reveal">
+            <div class="shot-label">Investments</div>
+            <img src="/static/screenshots/investments.png" alt="Investments" onerror="this.style.display='none'; this.parentElement.style.background='#111827'; this.parentElement.style.minHeight='180px'">
+        </div>
+        <div class="shot-card reveal">
+            <div class="shot-label">Analytics</div>
+            <img src="/static/screenshots/analytics.png" alt="Analytics" onerror="this.style.display='none'; this.parentElement.style.background='#111827'; this.parentElement.style.minHeight='180px'">
+        </div>
+        <div class="shot-card reveal">
+            <div class="shot-label">Budget</div>
+            <img src="/static/screenshots/budget.png" alt="Budget" onerror="this.style.display='none'; this.parentElement.style.background='#111827'; this.parentElement.style.minHeight='180px'">
+        </div>
+        <div class="shot-card reveal">
+            <div class="shot-label">AI Assistant</div>
+            <img src="/static/screenshots/ai-assistant.png" alt="AI Assistant" onerror="this.style.display='none'; this.parentElement.style.background='#111827'; this.parentElement.style.minHeight='180px'">
+        </div>
+    </div>
+</section>
+
+<!-- AI SECTION -->
+<div class="ai-section" id="ai">
+    <div class="ai-inner">
+        <div>
+            <div class="section-label">Intelligence</div>
+            <h2 class="section-title reveal">AI that understands your finances</h2>
+            <p class="section-sub reveal">Powered by Claude — Anthropic's AI — FinTrack turns your raw data into actionable insights.</p>
+
+            <div class="ai-features">
+                <div class="ai-feature reveal">
+                    <div class="ai-feature-icon">📊</div>
+                    <div>
+                        <h4>Spending Analysis</h4>
+                        <p>Get a detailed monthly breakdown with category insights, budget warnings and trend detection.</p>
+                    </div>
+                </div>
+                <div class="ai-feature reveal">
+                    <div class="ai-feature-icon">💡</div>
+                    <div>
+                        <h4>Savings Tips</h4>
+                        <p>Receive 3 personalized, actionable recommendations based on your actual spending habits.</p>
+                    </div>
+                </div>
+                <div class="ai-feature reveal">
+                    <div class="ai-feature-icon">💬</div>
+                    <div>
+                        <h4>Natural Language Input</h4>
+                        <p>Type "spent 200 TL on groceries" and AI instantly parses it into a transaction.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-visual reveal">
+            <div class="ai-card">
+                <div class="ai-card-header">
+                    <div class="ai-dot"></div>
+                    <span>AI Analysis Complete</span>
+                </div>
+                <div class="ai-lines">
+                    <div class="ai-line accent w-half"></div>
+                    <div class="ai-line w-full"></div>
+                    <div class="ai-line w-4-5"></div>
+                    <div class="ai-line w-3-4"></div>
+                </div>
+                <div class="ai-table">
+                    <div class="ai-table-row header">
+                        <span>Category</span><span>Amount</span><span>Share</span>
+                    </div>
+                    <div class="ai-table-row">
+                        <span>Rent</span><span>5,500 TL</span><span class="green">94.8%</span>
+                    </div>
+                    <div class="ai-table-row">
+                        <span>Food</span><span>300 TL</span><span>5.2%</span>
+                    </div>
+                </div>
+                <div style="margin-top:1rem;">
+                    <div class="ai-lines">
+                        <div class="ai-line teal w-full"></div>
+                        <div class="ai-line w-4-5"></div>
+                        <div class="ai-line w-3-4"></div>
+                        <div class="ai-line w-half"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA -->
+<section class="cta-section" style="position:relative;">
+    <div class="cta-glow"></div>
+    <h2 class="reveal">Ready to take control<br>of your finances?</h2>
+    <p class="reveal">Start tracking today. No setup required — just run the app and go.</p>
+    <a href="/dashboard" class="btn btn-primary btn-lg reveal">Open Dashboard →</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <a href="/" class="logo">💰 FinTrack</a>
+    <p>Built with Python · Flask · Claude API</p>
+    <div class="footer-links">
+        <a href="https://github.com/bilgenurpala/finance-tracker" target="_blank">GitHub</a>
+        <a href="/dashboard">Dashboard</a>
+    </div>
+</footer>
+
+<script>
+// Sticky nav
+window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+});
+
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+        if (e.isIntersecting) {
+            e.target.classList.add('visible');
+            observer.unobserve(e.target);
+        }
+    });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
