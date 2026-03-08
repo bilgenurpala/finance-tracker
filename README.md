@@ -32,32 +32,29 @@ FinTrack is a personal finance application that helps you manage income, expense
 
 ## 📸 Screenshots
 
-### Landing Page
-![Landing](screenshots/dashboard.png)
-
 ### Dashboard
-![Dashboard](screenshots/dashboard.png)
+![Dashboard](web/static/screenshots/dashboard.png)
 
 ### Analytics
-![Analytics](screenshots/analytics.png)
+![Analytics](web/static/screenshots/analytics.png)
 
 ### Budget
-![Budget](screenshots/budget.png)
+![Budget](web/static/screenshots/budget.png)
 
 ### Investments
-![Investments](screenshots/investments.png)
+![Investments](web/static/screenshots/investments.png)
 
 ### Categories
-![Categories](screenshots/categories.png)
+![Categories](web/static/screenshots/categories.png)
 
 ### AI Assistant
-![AI Assistant](screenshots/ai-assistant.png)
+![AI Assistant](web/static/screenshots/ai-assistant.png)
 
 ### AI Spending Analysis
-![AI Analysis](screenshots/ai-analysis.png)
+![AI Analysis](web/static/screenshots/ai-analysis.png)
 
 ### AI Savings Tips
-![AI Savings](screenshots/ai-savings.png)
+![AI Savings](web/static/screenshots/ai-savings.png)
 
 ---
 
@@ -83,8 +80,6 @@ FinTrack is a personal finance application that helps you manage income, expense
 finance-tracker/
 ├── data/
 │   └── finance.db
-├── screenshots/
-│   └── *.png
 ├── src/
 │   ├── models/
 │   │   ├── database.py
