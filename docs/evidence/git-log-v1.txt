@@ -1,0 +1,13 @@
+FinTrack v1 history captured before security history rewrite.
+Commit object IDs intentionally omitted.
+
+2026-02-19 | Initial commit: terminal-based finance tracker
+2026-02-20 | feat: add Flask web interface with dashboard UI
+2026-02-20 | docs: update README with Flask web interface
+2026-03-07 | chore: add gitignore and remove config from tracking
+2026-03-07 | feat: professional SaaS redesign + Claude AI integration + screenshots
+2026-03-07 | chore: hide HTML/CSS/JS from GitHub language stats
+2026-03-08 | feat: add authentication system + landing page
+2026-03-08 | docs: update README + fix GitHub language stats
+2026-03-08 | fix: update screenshot paths in README
+2026-03-08 | chore: fix linguist attributes to hide HTML/CSS/JS from language stats
