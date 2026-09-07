@@ -1,10 +1,12 @@
 from flask import Flask, redirect, url_for
 from flask_jwt_extended import JWTManager
-import config
+
+from settings import settings
+
 
 def create_app():
     app = Flask(__name__)
-    app.config["JWT_SECRET_KEY"] = config.SECRET_KEY
+    app.config["JWT_SECRET_KEY"] = settings.secret_key.get_secret_value()
     app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
     app.config["JWT_COOKIE_CSRF_PROTECT"] = False
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = False

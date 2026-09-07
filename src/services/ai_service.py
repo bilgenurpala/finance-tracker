@@ -1,9 +1,21 @@
 import anthropic
-import config
-from src.services.transaction_service import list_transactions, get_monthly_summary
-from src.services.budget_service import get_budget_status
 
-client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
+from settings import settings
+from src.services.budget_service import get_budget_status
+from src.services.transaction_service import (
+    get_monthly_summary,
+    list_transactions,
+)
+
+
+def get_client():
+    """Creates an Anthropic client when an AI feature is requested."""
+    api_key = settings.anthropic_api_key
+
+    if api_key is None or not api_key.get_secret_value():
+        raise RuntimeError("ANTHROPIC_API_KEY is not configured")
+
+    return anthropic.Anthropic(api_key=api_key.get_secret_value())
 
 def analyze_spending(month):
     summary = get_monthly_summary(month)
@@ -46,8 +58,8 @@ Formatting rules:
 - Keep it concise and practical.
 - Always respond in English."""
 
-    message = client.messages.create(
-        model="claude-opus-4-6",
+    message = get_client().messages.create(
+        model="claude-sonnet-5",
         max_tokens=2048,
         messages=[{"role": "user", "content": prompt}]
     )
@@ -74,8 +86,8 @@ Rules:
 - amount must be a number
 - description must be in English"""
 
-    message = client.messages.create(
-        model="claude-opus-4-6",
+    message = get_client().messages.create(
+        model="claude-haiku-4-5-20251001",
         max_tokens=256,
         messages=[{"role": "user", "content": prompt}]
     )
@@ -114,8 +126,8 @@ Formatting rules:
 - Use ### for any subsections within a tip
 - Always respond in English."""
 
-    message = client.messages.create(
-        model="claude-opus-4-6",
+    message = get_client().messages.create(
+        model="claude-haiku-4-5-20251001",
         max_tokens=512,
         messages=[{"role": "user", "content": prompt}]
     )
