@@ -1,224 +1,221 @@
-# 💰 FinTrack
+# FinTrack
 
-> A full-stack personal finance management application with a professional dark SaaS dashboard, JWT authentication, AI-powered insights, and real-time investment tracking.
+FinTrack is a personal finance application and a six-month engineering case study in rebuilding an early Flask project into a secure, tested, production-oriented system.
 
-![Python](https://img.shields.io/badge/Python-3.12+-blue?logo=python)
-![Flask](https://img.shields.io/badge/Flask-3.0+-lightgrey?logo=flask)
-![SQLite](https://img.shields.io/badge/Database-SQLite-lightgrey?logo=sqlite)
-![Claude AI](https://img.shields.io/badge/AI-Claude%20API-orange?logo=anthropic)
-![JWT](https://img.shields.io/badge/Auth-JWT-green?logo=jsonwebtokens)
-![License](https://img.shields.io/badge/License-MIT-green)
+The repository deliberately preserves the March 2026 interface and selected audit evidence. The purpose is not to present the first version as finished software, but to document how its architecture, security model, and product depth evolve under a structured review.
 
----
+> [!IMPORTANT]
+> FinTrack is under active reconstruction. The current Flask version is a historical baseline, not a production-ready financial system. Do not use it to store real financial data yet.
 
-## 📋 Table of Contents
+## Project status
 
-- [Overview](#overview)
-- [Screenshots](#screenshots)
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Tech Stack](#tech-stack)
-- [Roadmap](#roadmap)
-
----
-
-## 🔍 Overview
-
-FinTrack is a personal finance application that helps you manage income, expenses, budgets, and investments in one place. It features a professional dark-themed SaaS dashboard with interactive Chart.js visualizations, JWT-based user authentication, and an AI assistant powered by the Claude API for spending analysis, savings tips, and natural language transaction parsing.
-
----
-
-## 📸 Screenshots
-
-### Dashboard
-![Dashboard](web/static/screenshots/dashboard.png)
-
-### Analytics
-![Analytics](web/static/screenshots/analytics.png)
-
-### Budget
-![Budget](web/static/screenshots/budget.png)
-
-### Investments
-![Investments](web/static/screenshots/investments.png)
-
-### Categories
-![Categories](web/static/screenshots/categories.png)
-
-### AI Assistant
-![AI Assistant](web/static/screenshots/ai-assistant.png)
-
-### AI Spending Analysis
-![AI Analysis](web/static/screenshots/ai-analysis.png)
-
-### AI Savings Tips
-![AI Savings](web/static/screenshots/ai-savings.png)
-
----
-
-## ✨ Features
-
-| Feature | Description |
+| Item | Current state |
 |---|---|
-| 🔐 Authentication | JWT-based register, login and logout with bcrypt password hashing |
-| 💸 Transactions | Add, edit, delete income & expense records |
-| 🗂️ Categories | Organize transactions by custom categories |
-| 🎯 Budget Goals | Set monthly spending limits with progress tracking |
-| 📊 Charts | Interactive Chart.js visualizations across all pages |
-| 📈 Investments | Track BIST, NYSE/NASDAQ and crypto portfolios in real-time |
-| 🤖 AI Assistant | Claude-powered spending analysis, savings tips & natural language input |
-| 💬 Natural Language | Add transactions by typing plain text ("spent 150 TL on groceries") |
-| 🌐 Landing Page | Professional marketing page with hero, features and screenshots |
+| Active phase | Phase 0 complete; Linux foundation begins next |
+| Current application | Flask, SQLite, server-rendered Jinja |
+| Target application | FastAPI, PostgreSQL, async SQLAlchemy, Alembic |
+| Security posture | Exposed secrets removed and rotated; structural authorization and web-security findings remain open |
+| Test coverage | No automated suite yet; introduced in Phase 2 |
+| Intended use | Personal engineering portfolio and learning record |
+| Production readiness | Not production ready |
 
----
-
-## 📁 Project Structure
-
-```
-finance-tracker/
-├── data/
-│   └── finance.db
-├── src/
-│   ├── models/
-│   │   ├── database.py
-│   │   ├── category.py
-│   │   ├── transaction.py
-│   │   └── budget.py
-│   ├── services/
-│   │   ├── transaction_service.py
-│   │   ├── budget_service.py
-│   │   ├── recurring_service.py
-│   │   ├── auth_service.py
-│   │   └── ai_service.py
-│   ├── reports/
-│   │   └── charts.py
-│   └── investments/
-│       └── stock_tracker.py
-├── web/
-│   ├── templates/
-│   │   ├── base.html
-│   │   ├── landing.html
-│   │   ├── login.html
-│   │   ├── register.html
-│   │   ├── index.html
-│   │   ├── summary.html
-│   │   ├── budget.html
-│   │   ├── investments.html
-│   │   ├── categories.html
-│   │   └── ai.html
-│   ├── static/
-│   │   ├── css/style.css
-│   │   ├── js/main.js
-│   │   └── screenshots/
-│   ├── __init__.py
-│   └── routes.py
-├── app.py
-├── main.py
-├── config.py
-├── requirements.txt
-└── README.md
+```mermaid
+flowchart LR
+    V1["March 2026<br/>Flask v1"] --> Audit["September 2026<br/>Security and architecture audit"]
+    Audit --> P0["Phase 0<br/>Emergency secret remediation"]
+    P0 --> Rebuild["Phases 1–6<br/>Data model, API, tests and hardening"]
+    Rebuild --> ML["Phase 7<br/>Measured ML baselines and models"]
+    ML --> V2["March 2027<br/>Documented v2"]
 ```
 
----
+## Why this repository exists
 
-## ⚙️ Installation
+The first version was written before authentication, ownership, migrations, and defensive LLM output handling were understood as system-wide design concerns. A September 2026 audit found that these were not isolated bugs; they were consequences of implementation order and missing architectural boundaries.
 
-**1. Clone the repository**
+This rebuild keeps that evidence visible. Each phase records:
+
+- what the earlier implementation did;
+- which assumption failed;
+- how the design changed;
+- how the new behavior was verified.
+
+The tone is an audit record rather than a retrospective apology. Claims are tied to code, tests, or preserved evidence.
+
+## Phase 0 security remediation
+
+| Control | Result |
+|---|---|
+| Leaked provider credential | Revoked and replaced |
+| JWT signing secret | Replaced with a generated local secret |
+| Git history | Rewritten to remove compiled configuration and personal database artifacts |
+| Remote verification | Fresh clone confirmed removed paths and key marker were absent |
+| Local configuration | Migrated from an ignored Python module to `.env` and `pydantic-settings` |
+| Commit guard | Gitleaks pre-commit hook pinned to a reviewed version |
+| Repository hygiene | Database files, virtual environments, caches, and `.env` ignored |
+| Licensing | MIT license file added |
+
+The audit also identified unresolved application-level risks, including missing per-user ownership in financial tables, unsafe state-changing GET routes, disabled cookie CSRF protection, indefinite access tokens, and unsafe rendering of model output. These are tracked work, not closed findings. See [Security](docs/SECURITY.md) and the [sanitized v1 evidence](docs/evidence/v1-code-snippets.md).
+
+## Current architecture
+
+```mermaid
+flowchart TB
+    Browser[Browser] --> Views[Flask routes and Jinja views]
+    Views --> Services[Service modules]
+    Services --> SQLite[(Local SQLite database)]
+    Services --> Markets[yfinance market data]
+    Services --> Claude[Anthropic API]
+```
+
+The current system is intentionally retained only as the v1 baseline. Its central limitation is that authentication exists at the route layer while ownership is absent from the underlying financial schema. The target design is documented in [Architecture](docs/ARCHITECTURE.md).
+
+## V1 interface archive
+
+These screenshots preserve the March 2026 interface before the rebuild. They document the starting point and are not representations of the target product.
+
+| Dashboard | Analytics |
+|---|---|
+| ![FinTrack v1 dashboard](docs/screenshots/v1/dashboard.png) | ![FinTrack v1 analytics](docs/screenshots/v1/analytics.png) |
+
+| Budgets | Investments |
+|---|---|
+| ![FinTrack v1 budget view](docs/screenshots/v1/budget.png) | ![FinTrack v1 investments view](docs/screenshots/v1/investments.png) |
+
+| Categories | AI assistant |
+|---|---|
+| ![FinTrack v1 categories](docs/screenshots/v1/categories.png) | ![FinTrack v1 AI assistant](docs/screenshots/v1/ai-assistant.png) |
+
+| AI spending analysis | AI savings guidance |
+|---|---|
+| ![FinTrack v1 AI analysis](docs/screenshots/v1/ai-analysis.png) | ![FinTrack v1 AI savings guidance](docs/screenshots/v1/ai-savings.png) |
+
+## Current capabilities
+
+The retained Flask baseline includes:
+
+- income and expense entry;
+- category and monthly budget management;
+- monthly summaries and Chart.js visualizations;
+- investment position tracking through market-data lookups;
+- JWT cookie authentication;
+- Claude-powered monthly analysis, savings guidance, and natural-language transaction parsing;
+- a Rich-based terminal interface inherited from the first implementation.
+
+These features describe surface area, not security guarantees. Known limitations are documented openly and take precedence over feature claims.
+
+## Technology direction
+
+| Layer | V1 baseline | Target |
+|---|---|---|
+| Web framework | Flask | FastAPI and Uvicorn |
+| Rendering | Jinja templates | Server-rendered Jinja templates |
+| Persistence | Raw `sqlite3` and SQLite | SQLAlchemy 2.0 async, Alembic, PostgreSQL |
+| Validation | Ad hoc request handling | Pydantic v2 schemas |
+| Authentication | Flask-JWT-Extended cookies | PyJWT cookies, bounded sessions, explicit revocation |
+| Background work | Request-driven logic | APScheduler and Redis-backed coordination |
+| AI integration | Direct Anthropic messages | Structured, bounded, evaluated model workflows |
+| Verification | Manual checks | pytest-asyncio, HTTPX, security regression tests, CI |
+| Delivery | Local development server | Docker Compose and production ASGI serving |
+
+## Running the historical baseline
+
+The current application is retained for audit and migration work. Use synthetic data only.
+
+### Requirements
+
+- Git
+- Python 3.12
+- `uv` or another isolated Python environment tool
+
+### Setup
+
 ```bash
 git clone https://github.com/bilgenurpala/finance-tracker.git
 cd finance-tracker
+
+uv venv --python 3.12 .venv
+source .venv/bin/activate
+uv pip install -r requirements.txt
+
+cp .env.example .env
+python -c "import secrets; print(secrets.token_urlsafe(64))"
 ```
 
-**2. Install dependencies**
+Copy the generated value into `SECRET_KEY` in `.env`. Add an Anthropic API key only if the AI routes are being tested. Never commit `.env`.
+
+```dotenv
+SECRET_KEY=replace_with_generated_value
+ANTHROPIC_API_KEY=
+DATABASE_PATH=data/finance.db
+```
+
+Start the development application:
+
 ```bash
-py -m pip install -r requirements.txt
+python app.py
 ```
 
-**3. Configure API key**
+Then open `http://127.0.0.1:5000`. The current entry point enables Flask debug mode and must not be exposed to an untrusted network.
 
-Create a `config.py` file in the root directory:
-```python
-import os
+## Repository map
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATABASE_PATH = os.path.join(BASE_DIR, "data", "finance.db")
-CURRENCY = "TL"
-SECRET_KEY = "your-secret-key-here"
-ANTHROPIC_API_KEY = "your-api-key-here"  # Get from console.anthropic.com
+```text
+finance-tracker/
+├── app.py                     # Flask entry point retained for v1
+├── settings.py                # Environment-backed configuration
+├── src/
+│   ├── models/                # Raw SQLite access and schema creation
+│   ├── services/              # Finance, authentication, and AI logic
+│   ├── investments/           # Market-data integration
+│   └── reports/               # Legacy chart generation
+├── web/
+│   ├── templates/             # Server-rendered pages
+│   └── static/                # CSS, JavaScript, and retained v1 assets
+├── docs/
+│   ├── evidence/              # Sanitized audit evidence
+│   └── screenshots/v1/        # Archived March 2026 interface
+├── .env.example
+├── .pre-commit-config.yaml
+└── requirements.txt
 ```
 
-**4. Run the application**
-```bash
-py app.py
+## Roadmap
+
+```mermaid
+gantt
+    title FinTrack reconstruction plan
+    dateFormat  YYYY-MM-DD
+    axisFormat  %b %d
+    section Foundation
+    Emergency security remediation :done, p0, 2026-09-07, 1d
+    Linux environment and skeleton  :pA, 2026-09-08, 4d
+    Data model and FastAPI port      :p1, 2026-09-12, 17d
+    Hardening, tests and CI          :p2, 2026-09-29, 14d
+    section Product
+    Data import and search           :p3, 2026-10-13, 14d
+    Planning layer                   :p4, 2026-10-27, 21d
+    Reporting and net worth          :p5, 2026-11-17, 14d
+    section Intelligence
+    AI layer hardening               :p6, 2026-12-01, 7d
+    Model training and evaluation    :p7, 2026-12-08, 42d
+    section Completion
+    Investment depth                 :p8, 2027-01-19, 21d
+    Product completion               :p9, 2027-02-09, 28d
 ```
-Then open http://127.0.0.1:5000 in your browser.
 
----
+Detailed scope and exit criteria are maintained in [Roadmap](docs/ROADMAP.md).
 
-## 🚀 Usage
+## Documentation
 
-### Getting Started
-1. Navigate to `http://127.0.0.1:5000`
-2. Click **Get Started** to create an account
-3. Log in and access your personal dashboard
-
-### Web Dashboard
-Use the sidebar to navigate all features:
-
-- **Dashboard** — Monthly stats, income vs expense chart, category breakdown
-- **Analytics** — Monthly summary with interactive charts
-- **Budget** — Set and track budget goals with progress bars and charts
-- **Investments** — Add and track BIST, NYSE/NASDAQ, and crypto portfolios with P&L charts
-- **Categories** — Manage income and expense categories
-- **AI Assistant** — Claude-powered spending analysis, savings tips, and natural language transaction input
-
-### AI Assistant
-Navigate to `/ai` to use AI features:
-- **Spending Analysis** — Detailed monthly breakdown with insights
-- **Savings Tips** — Personalized recommendations based on your data
-- **Natural Language Input** — Type transactions in plain text:
-  - `"spent 200 TL on groceries today"`
-  - `"received 5000 TL salary"`
-
----
-
-## 🛠️ Tech Stack
-
-| Tool | Purpose |
+| Document | Purpose |
 |---|---|
-| Python 3.12 | Core language |
-| Flask | Web framework |
-| SQLite | Local database |
-| Flask-JWT-Extended | JWT authentication |
-| bcrypt | Password hashing |
-| Jinja2 | HTML templating |
-| Chart.js | Interactive charts |
-| Claude API | AI spending analysis & NLP |
-| Anthropic SDK | Claude API client |
-| yfinance | Real-time stock & crypto prices |
-| Rich | Terminal UI |
-| Matplotlib | Terminal charts |
+| [Architecture](docs/ARCHITECTURE.md) | Current constraints, target boundaries, and migration principles |
+| [Security](docs/SECURITY.md) | Audit scope, remediated exposure, open findings, and reporting policy |
+| [Roadmap](docs/ROADMAP.md) | Phase sequence, deliverables, and exit criteria |
+| [Design system](docs/design-system.md) | Visual tokens, semantics, accessibility, and frontend safety rules |
+| [V1 code evidence](docs/evidence/v1-code-snippets.md) | Sanitized excerpts captured before history cleanup |
+| [Secret scan notes](docs/evidence/secret-scan-notes.md) | Scanner limitations and independent validation |
 
----
+## License
 
-## 🗺️ Roadmap
-
-- [x] Terminal application
-- [x] Flask web interface
-- [x] Professional dark SaaS dashboard
-- [x] Interactive Chart.js visualizations
-- [x] Real-time investment tracking with P&L
-- [x] AI-powered spending analysis (Claude API)
-- [x] Natural language transaction input
-- [x] Landing page
-- [x] User authentication (JWT + bcrypt)
-- [ ] Multi-currency support
-- [ ] Export to CSV/PDF
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License.
+FinTrack is available under the [MIT License](LICENSE).
