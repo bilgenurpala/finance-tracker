@@ -11,10 +11,10 @@ The repository deliberately preserves the March 2026 interface and selected audi
 
 | Item | Current state |
 |---|---|
-| Active phase | Phase 0 complete; Linux foundation begins next |
+| Active phase | Phase A in progress: Linux toolchain and local service dependencies |
 | Current application | Flask, SQLite, server-rendered Jinja |
 | Target application | FastAPI, PostgreSQL, async SQLAlchemy, Alembic |
-| Security posture | Exposed secrets removed and rotated; structural authorization and web-security findings remain open |
+| Security posture | Exposed secrets removed and rotated, history rewrite independently verified, v1 repository archived as private; structural authorization and web-security findings remain open |
 | Test coverage | No automated suite yet; introduced in Phase 2 |
 | Intended use | Personal engineering portfolio and learning record |
 | Production readiness | Not production ready |
@@ -48,9 +48,11 @@ The tone is an audit record rather than a retrospective apology. Claims are tied
 | Leaked provider credential | Revoked and replaced |
 | JWT signing secret | Replaced with a generated local secret |
 | Git history | Rewritten to remove compiled configuration and personal database artifacts |
-| Remote verification | Fresh clone confirmed removed paths and key marker were absent |
-| Local configuration | Migrated from an ignored Python module to `.env` and `pydantic-settings` |
-| Commit guard | Gitleaks pre-commit hook pinned to a reviewed version |
+| Remote verification | Raw object scan of a fresh mirror clone found no target paths or content markers |
+| Verification method | Validated with a negative control against the pre-cleanup backup, independently of Gitleaks |
+| Residual server-side objects | Pre-rewrite commits remained retrievable by SHA; the v1 repository was archived as private and development moved to a new repository |
+| Local configuration | Migrated from an ignored Python module to `.env`; typed settings loading arrives with the FastAPI skeleton |
+| Commit guard | Gitleaks pre-commit hook pinned to a reviewed version; its default ruleset does not match the provider key format involved, so a custom rule is scheduled for Phase 2 |
 | Repository hygiene | Database files, virtual environments, caches, and `.env` ignored |
 | Licensing | MIT license file added |
 
@@ -157,6 +159,28 @@ python app.py
 
 Then open `http://127.0.0.1:5000`. The current entry point enables Flask debug mode and must not be exposed to an untrusted network.
 
+## Local service dependencies
+
+PostgreSQL and Redis run as containers and back the target architecture. The
+historical Flask baseline above does not use them.
+
+```bash
+cp .env.example .env
+docker compose up -d
+docker compose ps
+```
+
+Both services must report `healthy`. Credentials are read from `.env` and are
+never written into `docker-compose.yml`.
+
+Published ports bind to `127.0.0.1`, not `0.0.0.0`. This matters because Docker
+installs its own iptables rules ahead of the host firewall, so a port published
+to all interfaces stays reachable from the local network even with `ufw`
+enabled.
+
+Named volumes hold the data, so `docker compose down` removes the containers
+without discarding the databases.
+
 ## Repository map
 
 ```text
@@ -176,6 +200,7 @@ finance-tracker/
 │   └── screenshots/v1/        # Archived March 2026 interface
 ├── .env.example
 ├── .pre-commit-config.yaml
+├── docker-compose.yml         # PostgreSQL and Redis for the target stack
 └── requirements.txt
 ```
 
