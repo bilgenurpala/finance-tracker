@@ -53,3 +53,11 @@ extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Path", "f
 
 [tool.ruff.format]
 exclude = ["*.md"]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["pydantic.mypy"]
+files = ["app"]
+strict = true
+warn_unreachable = true
+show_error_codes = true

@@ -15,7 +15,7 @@ router = APIRouter(tags=["system"])
 async def _check_postgres(session: AsyncSession) -> bool:
     try:
         result = await session.execute(text("SELECT 1"))
-        return result.scalar_one() == 1
+        return bool(result.scalar_one() == 1)
     except Exception:
         logger.exception("Postgres health check failed")
         return False

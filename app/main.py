@@ -1,3 +1,4 @@
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -8,7 +9,7 @@ from app.db.base import create_engine, create_redis_pool, create_session_factory
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     engine = create_engine()
     app.state.engine = engine
     app.state.session_factory = create_session_factory(engine)
