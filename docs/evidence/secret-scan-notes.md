@@ -67,3 +67,15 @@ not untrack artifacts derived from it.
   objects.
 - Scanner-based verification is deferred to Phase 2, where a working
   `.gitleaks.toml` and a canary fixture will be added to CI.
+
+## The pre-commit hook is affected too
+
+The `detect-secrets` pre-commit hook reports `Passed` on every commit. A
+canary file containing a synthetic key in the correct live format
+(`sk-ant-api03-`, 109 characters) was staged and committed successfully with
+no warning. The commit was immediately reverted and never pushed.
+
+The hook is therefore not a control at present — it is a green light with
+nothing behind it. This is worth stating plainly: between the CI-facing
+scanner and the local hook, the repository currently has two secret-scanning
+mechanisms and zero secret-scanning coverage.
