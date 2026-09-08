@@ -4,7 +4,7 @@ __pycache__/
 
 .venv/
 .env
-config.py
+/config.py
 
 data/
 *.db
