@@ -8,3 +8,20 @@ config.py
 
 data/
 *.db
+
+# local env
+.envrc
+.direnv/
+
+# editor
+.vscode/
+.idea/
+
+# os
+.DS_Store
+
+# python
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

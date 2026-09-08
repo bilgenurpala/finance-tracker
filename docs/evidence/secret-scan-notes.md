@@ -79,3 +79,26 @@ The hook is therefore not a control at present — it is a green light with
 nothing behind it. This is worth stating plainly: between the CI-facing
 scanner and the local hook, the repository currently has two secret-scanning
 mechanisms and zero secret-scanning coverage.
+
+## Correction pending (2026-09-08)
+
+The root-cause analysis above is wrong and will be rewritten. Control tests
+run on 2026-09-08 established:
+
+- Gitleaks 8.30.1 loads its default ruleset correctly. A complete RSA private
+  key block (`openssl genrsa`, BEGIN/body/END) is detected by the built-in
+  `private-key` rule with no `-c` config. The 2026-09-07 miss is explained by
+  the canary file containing only a BEGIN line; the rule matches a block, not
+  a literal string.
+- A synthetic 109-character `sk-ant-api03-` key with real entropy is NOT
+  detected by the default ruleset. There is no built-in rule for this
+  provider. The gap is missing coverage, not a broken scanner.
+- The pre-commit hook (gitleaks 8.24.2, fetched by pre-commit) is functional.
+  A staged Slack bot token canary was detected and the commit was blocked.
+  The "non-functional hook" claim in the section below is incorrect.
+
+The takeaways in this document still hold, on firmer ground: a green report
+proves nothing about providers the ruleset does not cover.
+
+Phase 2 action: add `.gitleaks.toml` with an `anthropic-api-key` rule plus a
+canary fixture asserted in CI.
