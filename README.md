@@ -11,11 +11,11 @@ The repository deliberately preserves the March 2026 interface and selected audi
 
 | Item | Current state |
 |---|---|
-| Active phase | Phase A in progress: FastAPI skeleton running alongside the Flask app |
+| Active phase | Phase A complete: environment, quality gates and first tests in place. Phase 1 next: data model and FastAPI port |
 | Current application | Flask, SQLite, server-rendered Jinja; FastAPI skeleton on port 8000 with a config layer, async database and cache connections, and a health endpoint |
 | Target application | FastAPI, PostgreSQL, async SQLAlchemy, Alembic |
 | Security posture | Exposed secrets removed and rotated, history rewrite independently verified, v1 repository archived as private; structural authorization and web-security findings remain open |
-| Test coverage | No automated suite yet; introduced in Phase 2 |
+| Test coverage | 12 tests covering the health endpoint and settings validation; 81 percent of app/. Each gate verified against a deliberately broken input |
 | Intended use | Personal engineering portfolio and learning record |
 | Production readiness | Not production ready |
 
