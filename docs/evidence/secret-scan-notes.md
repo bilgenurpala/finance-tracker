@@ -1,6 +1,7 @@
 # Secret Scan Notes
 
 Captured on 2026-09-07 during the FinTrack v1 security audit.
+Root-cause section rewritten on 2026-09-08 after further control tests.
 
 ## What the scanner reported
 
@@ -23,25 +24,64 @@ omitted from this document.
 
 ## Why the scanner found nothing
 
-The zero-finding report was not a detection gap in the rules. It was a
-non-functioning ruleset. Three checks isolated the cause:
+The default ruleset has no rule for Anthropic API keys. The scanner ran
+correctly, loaded its rules, and matched none of them, because none of them
+describe the credential that was present.
 
-| Input | Default ruleset | Explicit `-c` config |
+Control tests, 2026-09-08, gitleaks 8.30.1, default ruleset, no `-c` config:
+
+| Canary | Command | Result |
 |---|---|---|
-| Real key, extracted to plain text | not detected | — |
-| Synthetic high-entropy key, correct format | not detected | — |
-| `-----BEGIN RSA PRIVATE KEY-----` (literal match, no entropy threshold) | not detected | detected |
+| Complete RSA private key block (`openssl genrsa`) | `gitleaks dir .` | detected — `private-key` |
+| Slack bot token, documented format | `gitleaks dir .` | detected — `slack-bot-token` |
+| Synthetic `sk-ant-api03-` key, 109 chars, high entropy | `gitleaks dir .` | **not detected** |
 
-The third row settles it. A literal string match is the simplest rule the
-tool has. It failed under the default ruleset and succeeded immediately when
-a two-rule config file was passed explicitly. No `GITLEAKS_CONFIG` variable
-was set and no `.gitleaks.toml` existed in the repository or the home
-directory, so nothing was overriding the defaults — they simply were not
-loaded.
+The first two rows show the default ruleset loads and matches. The third
+isolates the gap to provider coverage.
 
-An earlier draft of this document attributed the miss to binary artifacts
-being skipped during diff-based scanning. That explanation was plausible and
-wrong; it was written before the control tests above were run.
+This is worth stating precisely, because the two failure modes call for
+different fixes: a broken scanner is repaired, a missing rule is written.
+
+## Two rejected explanations
+
+Both were plausible, both were wrong, and each was rejected by a test rather
+than by argument.
+
+**1. "Binary artifacts are skipped during diff-based scanning."**
+Rejected 2026-09-07. Written before any control test was run.
+
+**2. "The default ruleset is not being loaded at all."**
+Rejected 2026-09-08. This one survived a day and was recorded as fact, so it
+is worth explaining how it passed a control test that should have caught it.
+
+The supporting evidence was a canary containing the literal line
+`-----BEGIN RSA PRIVATE KEY-----`, which went undetected under defaults and was
+detected with an explicit two-rule config. The inference was that the simplest
+possible rule had failed, therefore no rules were loading.
+
+The inference was wrong because the premise was wrong. The built-in
+`private-key` rule is not a literal string match — it matches a delimited block,
+opening line through closing line. A lone BEGIN line does not satisfy it. The
+hand-written rule in `my.toml` was a plain regex, so it matched. Two different
+rules, two different behaviours, no evidence about loading either way.
+
+A canary that fails for a reason you have not verified is not a control test.
+
+## The pre-commit hook
+
+The hook is functional. Verified 2026-09-08: a Slack bot token canary was
+staged and `pre-commit run gitleaks` returned `Failed`, exit code 1, with the
+finding redacted in the output. A commit attempt was blocked.
+
+An earlier note in this document claimed the hook was non-functional, and
+commit `27fc459` repeats that claim in its message. Both are incorrect. The
+original test used a synthetic `sk-ant-api03-` key, which falls in the same
+coverage gap described above — the hook behaved correctly on an input it has
+no rule for.
+
+Note that the hook and the CLI are different binaries: the hook uses gitleaks
+8.24.2, fetched and cached by pre-commit, while the system CLI is 8.30.1. Both
+were tested; both work.
 
 ## Root cause of the exposure itself
 
@@ -51,12 +91,17 @@ not untrack artifacts derived from it.
 
 ## Takeaways
 
-1. A clean secret-scan report is not evidence of a clean repository. Verify
-   the scanner detects a known planted secret before trusting a green result.
-2. CI secret scanning needs a canary fixture — a file with a deliberate,
-   non-live secret that the pipeline asserts is caught. Without it, a silently
-   broken scanner passes every build.
-3. Remediation here did not depend on the scanner. History was verified
+1. A clean secret-scan report is evidence about the ruleset, not about the
+   repository. It says nothing about credentials the rules do not describe.
+2. Provider coverage is the blind spot to check first. Newer or smaller API
+   providers are the ones most likely to be missing from a default ruleset,
+   and they are exactly the ones a side project is likely to use.
+3. A canary fixture belongs in CI: a deliberate, non-live secret the pipeline
+   asserts is caught. Without it, a scanner that covers nothing relevant
+   passes every build.
+4. Verify what a failed canary actually proves. Read the rule before drawing
+   a conclusion from it.
+5. Remediation here did not depend on the scanner. History was verified
    directly with `git rev-list --objects --all` and byte-level inspection of
    every blob.
 
@@ -65,40 +110,7 @@ not untrack artifacts derived from it.
 - History rewrite verified locally and against a fresh mirror clone of the
   remote: the removed paths and the key marker are absent from all reachable
   objects.
-- Scanner-based verification is deferred to Phase 2, where a working
-  `.gitleaks.toml` and a canary fixture will be added to CI.
-
-## The pre-commit hook is affected too
-
-The `detect-secrets` pre-commit hook reports `Passed` on every commit. A
-canary file containing a synthetic key in the correct live format
-(`sk-ant-api03-`, 109 characters) was staged and committed successfully with
-no warning. The commit was immediately reverted and never pushed.
-
-The hook is therefore not a control at present — it is a green light with
-nothing behind it. This is worth stating plainly: between the CI-facing
-scanner and the local hook, the repository currently has two secret-scanning
-mechanisms and zero secret-scanning coverage.
-
-## Correction pending (2026-09-08)
-
-The root-cause analysis above is wrong and will be rewritten. Control tests
-run on 2026-09-08 established:
-
-- Gitleaks 8.30.1 loads its default ruleset correctly. A complete RSA private
-  key block (`openssl genrsa`, BEGIN/body/END) is detected by the built-in
-  `private-key` rule with no `-c` config. The 2026-09-07 miss is explained by
-  the canary file containing only a BEGIN line; the rule matches a block, not
-  a literal string.
-- A synthetic 109-character `sk-ant-api03-` key with real entropy is NOT
-  detected by the default ruleset. There is no built-in rule for this
-  provider. The gap is missing coverage, not a broken scanner.
-- The pre-commit hook (gitleaks 8.24.2, fetched by pre-commit) is functional.
-  A staged Slack bot token canary was detected and the commit was blocked.
-  The "non-functional hook" claim in the section below is incorrect.
-
-The takeaways in this document still hold, on firmer ground: a green report
-proves nothing about providers the ruleset does not cover.
-
-Phase 2 action: add `.gitleaks.toml` with an `anthropic-api-key` rule plus a
-canary fixture asserted in CI.
+- Pre-commit hook verified working against a covered canary.
+- Anthropic API keys remain uncovered by the default ruleset. Phase 2 will add
+  `.gitleaks.toml` with an `anthropic-api-key` rule and a CI-asserted canary
+  fixture.
