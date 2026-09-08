@@ -34,7 +34,14 @@ No secret value, personal record, historical object ID, or reproduction procedur
 | Medium | Monetary values use floating point | Phase 1 |
 | Medium | Schema changes have no migration system | Phase 1 |
 | Medium | Budget matching relies on category display names | Phase 1 |
-| Medium | Automated tests and CI are absent | Phase 2 |
+| Medium | Continuous integration is absent (test suite added Phase A) | Phase 2 |
+| Medium | Secret scanning does not recognise the provider key format that leaked | Phase 2 |
+| Medium | Settings validation errors print every value read from the environment | Phase 2 |
+| Low | Ignore-rule coverage is verified manually, not by an automated check | Phase 2 |
+| Low | Type checking does not cover the test suite | Phase 2 |
+| Low | Health endpoint fails at startup instead of degrading when a dependency is down | Phase 2 |
+| Medium | Market identifiers are compared case-sensitively, so price lookup silently fails or resolves the wrong asset | Phase 1 |
+| Low | Templates render service values that may be null, taking a whole page down | Phase 1 |
 
 ## Secret handling
 
@@ -45,7 +52,7 @@ No secret value, personal record, historical object ID, or reproduction procedur
 - Provider-side rotation is mandatory; history rewriting is insufficient by itself.
 - Secret scanning is a guardrail, not proof that a repository is secret-free.
 
-Public evidence is limited to [sanitized code excerpts](evidence/v1-code-snippets.md), [scan notes](evidence/secret-scan-notes.md), and a [hash-free history record](evidence/git-log-v1.txt). Original backups remain offline and must never be pushed or synchronized.
+Public evidence is limited to [sanitized code excerpts](evidence/v1-code-snippets.md), [scan notes](evidence/secret-scan-notes.md), a [hash-free history record](evidence/git-log-v1.txt), a [tooling coverage measurement](evidence/tooling-coverage.md), and the [skeleton verification record](evidence/day4-fastapi-skeleton.md). Original backups remain offline and must never be pushed or synchronized.
 
 ## Reporting a vulnerability
 
