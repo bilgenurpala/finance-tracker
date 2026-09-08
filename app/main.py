@@ -2,8 +2,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.core.config import get_settings
 from app.api.v1 import health
+from app.core.config import get_settings
 from app.db.base import create_engine, create_redis_pool, create_session_factory
 
 
