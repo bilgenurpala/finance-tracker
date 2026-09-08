@@ -135,9 +135,7 @@ The current application is retained for audit and migration work. Use synthetic 
 git clone https://github.com/bilgenurpala/finance-tracker.git
 cd finance-tracker
 
-uv venv --python 3.12 .venv
-source .venv/bin/activate
-uv pip install -r requirements.txt
+uv sync
 
 cp .env.example .env
 python -c "import secrets; print(secrets.token_urlsafe(64))"
@@ -201,7 +199,8 @@ finance-tracker/
 ├── .env.example
 ├── .pre-commit-config.yaml
 ├── docker-compose.yml         # PostgreSQL and Redis for the target stack
-└── requirements.txt
+├── pyproject.toml             # Dependencies, ruff, mypy and pytest configuration
+└── uv.lock
 ```
 
 ## Roadmap
@@ -213,7 +212,7 @@ gantt
     axisFormat  %b %d
     section Foundation
     Emergency security remediation :done, p0, 2026-09-07, 1d
-    Linux environment and skeleton  :pA, 2026-09-08, 4d
+    Linux environment and skeleton  :done, pA, 2026-09-08, 4d
     Data model and FastAPI port      :p1, 2026-09-12, 17d
     Hardening, tests and CI          :p2, 2026-09-29, 14d
     section Product
